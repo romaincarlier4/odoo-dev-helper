@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="payroll_structure_visualizer.Visualizer">
+    <div class="o_action o_psv_root">
+
+        <!-- ── Toolbar ── -->
+        <div class="o_psv_toolbar d-flex align-items-center gap-3 px-3 py-2 border-bottom bg-white">
+            <h4 class="mb-0 me-3 fw-semibold">
+                <i class="fa fa-sitemap me-2 text-primary"/>
+                Salary Structure Visualizer
+            </h4>
+            <div class="input-group input-group-sm" style="max-width:260px">
+                <span class="input-group-text"><i class="fa fa-search"/></span>
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Filter rules by name or code…"
+                    t-att-value="state.filterText"
+                    t-on-input="onSearchInput"
+                />
+            </div>
+            <div class="form-check form-switch mb-0 ms-1">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="psv_shared_toggle"
+                    t-att-checked="state.showOnlyShared"
+                    t-on-change="toggleSharedFilter"
+                />
+                <label class="form-check-label small" for="psv_shared_toggle">Shared rules only</label>
+            </div>
+            <div class="ms-auto d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" t-on-click="expandAll">
+                    <i class="fa fa-expand me-1"/>Expand all
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" t-on-click="collapseAll">
+                    <i class="fa fa-compress me-1"/>Collapse all
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Legend ── -->
+        <div class="o_psv_legend px-3 py-1 border-bottom bg-light d-flex align-items-center gap-3">
+            <span class="small text-muted">Legend:</span>
+            <span class="o_psv_badge_shared small"><i class="fa fa-link me-1"/>Shared rule</span>
+            <span class="o_psv_badge_exclusive small"><i class="fa fa-circle me-1"/>Exclusive rule</span>
+            <span class="small text-muted ms-2">Click a shared rule to highlight all structures using it.</span>
+        </div>
+
+        <!-- ── Loading ── -->
+        <t t-if="state.loading">
+            <div class="d-flex justify-content-center align-items-center" style="height:200px">
+                <div class="spinner-border text-primary" role="status"/>
+            </div>
+        </t>
+
+        <!-- ── Main layout ── -->
+        <t t-else="">
+            <div class="o_psv_body d-flex" t-att-class="{'o_psv_panel_open': state.selectedRule}">
+
+                <!-- Tree panel -->
+                <div class="o_psv_tree flex-grow-1 overflow-auto p-3">
+                    <t t-if="!filteredStructures.length">
+                        <div class="text-center text-muted py-5">
+                            <i class="fa fa-inbox fa-2x mb-2 d-block"/>
+                            No structures match the current filter.
+                        </div>
+                    </t>
+                    <t t-foreach="filteredStructures" t-as="struct" t-key="struct.id">
+                        <div class="o_psv_struct_node"
+                             t-att-class="{
+                                'o_psv_struct_highlighted': structHasSelectedRule(struct),
+                                'o_psv_struct_dimmed': structIsDimmed(struct),
+                             }">
+
+                            <!-- Structure row -->
+                            <div class="o_psv_struct_row d-flex align-items-center gap-2"
+                                 t-on-click="() => this.toggleExpand(struct.id)">
+                                <i t-att-class="isExpanded(struct.id) ? 'fa fa-chevron-down o_psv_chevron' : 'fa fa-chevron-right o_psv_chevron'"/>
+                                <span class="o_psv_struct_name fw-semibold" t-esc="struct.name"/>
+                                <t t-if="struct.type_id">
+                                    <span class="o_psv_struct_type text-muted small" t-esc="struct.type_id[1]"/>
+                                </t>
+                                <t t-if="struct.country_id">
+                                    <span class="badge bg-light text-secondary border small" t-esc="struct.country_id[1]"/>
+                                </t>
+                                <div class="ms-auto d-flex align-items-center gap-2">
+                                    <t t-if="struct.shared_rule_count > 0">
+                                        <span class="badge o_psv_badge_shared_count">
+                                            <i class="fa fa-link me-1"/>
+                                            <t t-esc="struct.shared_rule_count"/> shared
+                                        </span>
+                                    </t>
+                                    <span class="badge bg-secondary" t-esc="struct.rule_count + ' rules'"/>
+                                </div>
+                            </div>
+
+                            <!-- Rules (children) -->
+                            <t t-if="isExpanded(struct.id)">
+                                <div class="o_psv_rules_list">
+                                    <t t-if="!struct.rules.length">
+                                        <div class="o_psv_rule_row text-muted small fst-italic">
+                                            No rules
+                                        </div>
+                                    </t>
+                                    <t t-foreach="struct.rules" t-as="rule" t-key="rule.id">
+                                        <div class="o_psv_rule_row d-flex align-items-center gap-2"
+                                             t-att-class="{
+                                                'o_psv_rule_selected': isRuleSelected(rule.id),
+                                                'o_psv_rule_shared_row': rule.is_shared,
+                                                'o_psv_rule_clickable': rule.is_shared,
+                                             }"
+                                             t-att-title="rule.is_shared ? 'Shared by ' + rule.struct_count + ' structures — click to highlight' : rule.name"
+                                             t-on-click="rule.is_shared ? () => this.selectRule(rule) : undefined">
+
+                                            <!-- Tree connector -->
+                                            <span class="o_psv_connector"/>
+
+                                            <!-- Rule code -->
+                                            <code class="o_psv_rule_code" t-esc="rule.code"/>
+
+                                            <!-- Rule name -->
+                                            <span class="o_psv_rule_name flex-grow-1" t-esc="rule.name"/>
+
+                                            <!-- Shared badge -->
+                                            <t t-if="rule.is_shared">
+                                                <span class="badge o_psv_badge_shared_rule"
+                                                      t-att-class="{'o_psv_selected_badge': isRuleSelected(rule.id)}">
+                                                    <i class="fa fa-link me-1"/>
+                                                    <t t-esc="rule.struct_count"/> structures
+                                                </span>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Detail panel -->
+                <t t-if="state.selectedRule">
+                    <div class="o_psv_detail_panel border-start bg-white overflow-auto">
+                        <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                            <h6 class="mb-0 fw-semibold text-primary">
+                                <i class="fa fa-link me-2"/>Shared Rule
+                            </h6>
+                            <button class="btn-close" t-on-click="clearSelection"/>
+                        </div>
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <div class="text-muted small mb-1">Rule name</div>
+                                <div class="fw-semibold" t-esc="state.selectedRule.name"/>
+                            </div>
+                            <div class="mb-3">
+                                <div class="text-muted small mb-1">Code</div>
+                                <code class="o_psv_detail_code" t-esc="state.selectedRule.code"/>
+                            </div>
+                            <div>
+                                <div class="text-muted small mb-2">
+                                    Used in
+                                    <strong t-esc="state.selectedRule.struct_count"/>
+                                    structures:
+                                </div>
+                                <ul class="list-unstyled mb-0">
+                                    <t t-foreach="selectedRuleStructures" t-as="s" t-key="s.id">
+                                        <li class="o_psv_detail_struct_item d-flex align-items-center gap-2 py-1">
+                                            <i class="fa fa-file-text-o text-primary"/>
+                                            <span t-esc="s.name"/>
+                                            <t t-if="s.type_id">
+                                                <span class="text-muted small" t-esc="'(' + s.type_id[1] + ')'"/>
+                                            </t>
+                                        </li>
+                                    </t>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+            </div>
+        </t>
+    </div>
+</t>
+
+</templates>

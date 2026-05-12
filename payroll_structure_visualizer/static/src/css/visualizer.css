@@ -1,0 +1,212 @@
+/* ================================================================
+   Payroll Structure Visualizer
+   ================================================================ */
+
+.o_psv_root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f8f9fa;
+}
+
+/* ── Toolbar ── */
+.o_psv_toolbar {
+    flex-shrink: 0;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    z-index: 2;
+}
+
+/* ── Legend ── */
+.o_psv_legend {
+    flex-shrink: 0;
+}
+
+.o_psv_badge_shared {
+    color: #e67e22;
+    font-weight: 600;
+}
+
+.o_psv_badge_exclusive {
+    color: #6c757d;
+}
+
+/* ── Body layout ── */
+.o_psv_body {
+    flex: 1 1 auto;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* ── Detail panel ── */
+.o_psv_detail_panel {
+    width: 300px;
+    flex-shrink: 0;
+    transition: width 0.2s ease;
+}
+
+.o_psv_detail_code {
+    display: inline-block;
+    background: #f0f0f0;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.9em;
+    color: #0d6efd;
+}
+
+.o_psv_detail_struct_item {
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9em;
+}
+
+.o_psv_detail_struct_item:last-child {
+    border-bottom: none;
+}
+
+/* ── Tree ── */
+.o_psv_tree {
+    min-height: 0;
+}
+
+/* Structure node */
+.o_psv_struct_node {
+    margin-bottom: 6px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    transition: border-color 0.2s, opacity 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+
+.o_psv_struct_node.o_psv_struct_highlighted {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13,110,253,.12);
+}
+
+.o_psv_struct_node.o_psv_struct_dimmed {
+    opacity: 0.35;
+}
+
+/* Structure header row */
+.o_psv_struct_row {
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.o_psv_struct_row:hover {
+    background: #f0f4ff;
+}
+
+.o_psv_struct_node.o_psv_struct_highlighted .o_psv_struct_row {
+    background: #eef3ff;
+}
+
+.o_psv_chevron {
+    width: 14px;
+    color: #6c757d;
+    font-size: 0.75em;
+    transition: transform 0.15s;
+}
+
+.o_psv_struct_name {
+    font-size: 0.95em;
+}
+
+.o_psv_struct_type {
+    font-size: 0.78em;
+    background: #f0f0f0;
+    border-radius: 4px;
+    padding: 1px 6px;
+}
+
+.o_psv_badge_shared_count {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+    font-size: 0.72em;
+}
+
+/* ── Rule rows ── */
+.o_psv_rules_list {
+    border-top: 1px solid #f0f0f0;
+    padding: 4px 0;
+}
+
+.o_psv_rule_row {
+    padding: 5px 14px 5px 32px;
+    font-size: 0.85em;
+    transition: background 0.1s;
+    border-radius: 0;
+}
+
+.o_psv_rule_clickable {
+    cursor: pointer;
+}
+
+.o_psv_rule_clickable:hover {
+    background: #fff8ee;
+}
+
+.o_psv_rule_selected {
+    background: #fff3cd !important;
+}
+
+/* Tree connector line */
+.o_psv_connector {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    position: relative;
+    border-left: 2px solid #dee2e6;
+    border-bottom: 2px solid #dee2e6;
+    border-bottom-left-radius: 4px;
+    margin-right: 4px;
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+/* Rule code badge */
+.o_psv_rule_code {
+    display: inline-block;
+    font-size: 0.8em;
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    padding: 0 5px;
+    color: #495057;
+    flex-shrink: 0;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+}
+
+.o_psv_rule_shared_row .o_psv_rule_code {
+    background: #fff3e0;
+    border-color: #ffb74d;
+    color: #e65100;
+}
+
+.o_psv_rule_name {
+    color: #212529;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Shared rule badge */
+.o_psv_badge_shared_rule {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+    font-size: 0.72em;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.o_psv_badge_shared_rule.o_psv_selected_badge {
+    background: #ffc107;
+    color: #212529;
+}

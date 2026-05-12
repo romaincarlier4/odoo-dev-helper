@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===== Client Action: Visual Tree ===== -->
+    <record id="action_payroll_structure_visual_tree" model="ir.actions.client">
+        <field name="name">Structure Visualizer</field>
+        <field name="tag">payroll_structure_visualizer</field>
+    </record>
+
+    <!-- ===== Client Action: Rule Graph ===== -->
+    <record id="action_payroll_rule_graph" model="ir.actions.client">
+        <field name="name">Rule Graph</field>
+        <field name="tag">payroll_rule_graph</field>
+    </record>
+
+    <!-- ===== Salary Structure: Visualizer List View ===== -->
+    <record id="view_hr_payroll_structure_visualizer_list" model="ir.ui.view">
+        <field name="name">hr.payroll.structure.visualizer.list</field>
+        <field name="model">hr.payroll.structure</field>
+        <field name="arch" type="xml">
+            <list string="Salary Structures"
+                  decoration-muted="not active"
+                  default_order="type_id, name">
+                <field name="active" column_invisible="True"/>
+                <field name="name" string="Structure"/>
+                <field name="type_id" string="Type" optional="show"/>
+                <field name="country_id" optional="show" options="{'no_open': True}"/>
+                <field name="rule_count" string="Rules"/>
+                <field name="shared_rule_count" string="Shared Rules"
+                       decoration-warning="shared_rule_count > 0"
+                       decoration-success="shared_rule_count == 0 and rule_count > 0"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ===== Salary Structure: Visualizer Form View ===== -->
+    <record id="view_hr_payroll_structure_visualizer_form" model="ir.ui.view">
+        <field name="name">hr.payroll.structure.visualizer.form</field>
+        <field name="model">hr.payroll.structure</field>
+        <field name="arch" type="xml">
+            <form string="Salary Structure" create="false" delete="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Structure"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="type_id" readonly="1"/>
+                            <field name="country_id" readonly="1" options="{'no_open': True}"/>
+                        </group>
+                        <group>
+                            <field name="rule_count" readonly="1"/>
+                            <field name="shared_rule_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Salary Rules" name="salary_rules">
+                            <field name="rule_ids" readonly="1">
+                                <list string="Rules"
+                                      decoration-info="is_shared"
+                                      default_order="sequence, id">
+                                    <field name="sequence" string="Seq" optional="show"/>
+                                    <field name="name" string="Rule"/>
+                                    <field name="code"/>
+                                    <field name="category_ids" widget="many2many_tags" optional="show"/>
+                                    <field name="struct_count" string="# Structures"
+                                           decoration-warning="struct_count > 1"
+                                           decoration-muted="struct_count == 1"/>
+                                    <field name="is_shared" widget="boolean_toggle" readonly="1"
+                                           string="Shared"/>
+                                    <field name="struct_ids" widget="many2many_tags"
+                                           string="Used In" optional="show"
+                                           options="{'no_open': True}"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===== Salary Structure: Search View ===== -->
+    <record id="view_hr_payroll_structure_visualizer_search" model="ir.ui.view">
+        <field name="name">hr.payroll.structure.visualizer.search</field>
+        <field name="model">hr.payroll.structure</field>
+        <field name="arch" type="xml">
+            <search string="Search Structures">
+                <field name="name" string="Structure"/>
+                <field name="type_id" string="Type"/>
+                <field name="country_id" string="Country"/>
+                <filter name="has_shared_rules" string="Has Shared Rules"
+                        domain="[('shared_rule_count', '>', 0)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_by_type" string="Type"
+                            context="{'group_by': 'type_id'}"/>
+                    <filter name="group_by_country" string="Country"
+                            context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===== Salary Structure: Visualizer Action ===== -->
+    <record id="action_payroll_structure_visualizer" model="ir.actions.act_window">
+        <field name="name">Structure Visualizer</field>
+        <field name="res_model">hr.payroll.structure</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_hr_payroll_structure_visualizer_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_hr_payroll_structure_visualizer_form')}),
+        ]"/>
+        <field name="search_view_id" ref="view_hr_payroll_structure_visualizer_search"/>
+        <field name="context">{'search_default_group_by_type': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No salary structures found.
+            </p>
+            <p>
+                Browse salary structures grouped by type and see which rules are shared across structures.
+                Rules highlighted in blue are shared with at least one other structure.
+            </p>
+        </field>
+    </record>
+
+    <!-- ===== Salary Rule: Shared Rules List View ===== -->
+    <record id="view_hr_salary_rule_shared_list" model="ir.ui.view">
+        <field name="name">hr.salary.rule.shared.list</field>
+        <field name="model">hr.salary.rule</field>
+        <field name="arch" type="xml">
+            <list string="Salary Rules"
+                  decoration-info="is_shared"
+                  decoration-muted="not active"
+                  default_order="sequence, id">
+                <field name="active" column_invisible="True"/>
+                <field name="sequence" string="Seq" optional="show"/>
+                <field name="name" string="Rule"/>
+                <field name="code"/>
+                <field name="category_ids" widget="many2many_tags" optional="show"/>
+                <field name="country_id" optional="show" options="{'no_open': True}"/>
+                <field name="struct_count" string="# Structures"
+                       decoration-warning="struct_count > 1"
+                       decoration-muted="struct_count == 1"/>
+                <field name="is_shared" string="Shared" widget="boolean_toggle" readonly="1"/>
+                <field name="struct_ids" widget="many2many_tags"
+                       string="Used In" optional="show"
+                       options="{'no_open': True}"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ===== Salary Rule: Search View ===== -->
+    <record id="view_hr_salary_rule_shared_search" model="ir.ui.view">
+        <field name="name">hr.salary.rule.shared.search</field>
+        <field name="model">hr.salary.rule</field>
+        <field name="arch" type="xml">
+            <search string="Search Salary Rules">
+                <field name="name" string="Rule"/>
+                <field name="code"/>
+                <field name="struct_ids" string="Structure"/>
+                <filter name="shared_only" string="Shared Rules Only"
+                        domain="[('is_shared', '=', True)]"/>
+                <filter name="exclusive_only" string="Non-Shared Rules Only"
+                        domain="[('is_shared', '=', False)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_by_country" string="Country"
+                            context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===== Salary Rule: Shared Rules Action ===== -->
+    <record id="action_salary_rule_shared_view" model="ir.actions.act_window">
+        <field name="name">Rule Sharing Map</field>
+        <field name="res_model">hr.salary.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_hr_salary_rule_shared_list')}),
+        ]"/>
+        <field name="search_view_id" ref="view_hr_salary_rule_shared_search"/>
+        <field name="context">{'search_default_shared_only': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No shared salary rules found.
+            </p>
+            <p>
+                Rules highlighted in blue are used by more than one salary structure.
+            </p>
+        </field>
+    </record>
+
+</odoo>

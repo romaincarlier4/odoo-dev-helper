@@ -1,0 +1,205 @@
+/* ================================================================
+   Payroll Rule Graph  —  Odoo hierarchy-style column layout
+   ================================================================ */
+
+.o_prg_root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f8f9fa;
+}
+
+/* ── Toolbar ── */
+.o_prg_toolbar {
+    flex-shrink: 0;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    z-index: 2;
+}
+
+/* Legend dots */
+.o_prg_legend_shared {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    flex-shrink: 0;
+}
+
+.o_prg_legend_exclusive {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: #e9ecef;
+    border: 1px solid #adb5bd;
+    flex-shrink: 0;
+}
+
+/* ── Body ── */
+.o_prg_body {
+    flex: 1 1 auto;
+    display: flex;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.o_prg_columns_area {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* ── Structure columns ── */
+.o_prg_column {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ── Structure header ── */
+.o_prg_struct_header {
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.o_prg_struct_header_body {
+    min-height: 64px;
+}
+
+/* ── Stem connector (vertical line between cards) ── */
+.o_prg_stem {
+    width: 2px;
+    height: 24px;
+    background: var(--stem-color, #adb5bd);
+    flex-shrink: 0;
+    opacity: 0.5;
+}
+
+/* ── Rule node wrapper ── */
+.o_prg_rule_node {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 0.2s;
+}
+
+.o_prg_rule_node.o_prg_rule_dimmed {
+    opacity: 0.25;
+}
+
+.o_prg_rule_node.o_prg_rule_clickable {
+    cursor: pointer;
+}
+
+/* ── Rule card ── */
+.o_prg_rule_card {
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,.07);
+    border-left-width: 3px !important;
+    border-left-color: var(--rule-color, #adb5bd) !important;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.o_prg_rule_clickable .o_prg_rule_card:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,.12);
+    transform: translateX(2px);
+}
+
+/* Shared rule card */
+.o_prg_rule_shared .o_prg_rule_card {
+    background: #fffdf5 !important;
+    border-color: #ffc107 !important;
+}
+
+/* Selected (highlighted) rule card */
+.o_prg_rule_selected .o_prg_rule_card {
+    background: #fff3cd !important;
+    box-shadow: 0 0 0 2px #ffc107, 0 3px 10px rgba(0,0,0,.12);
+    transform: translateX(2px);
+}
+
+/* ── Rule card content ── */
+.o_prg_code {
+    font-size: 0.8em;
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: #495057;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    flex-shrink: 0;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_prg_rule_shared .o_prg_code {
+    background: #fff3e0;
+    border-color: #ffcc80;
+    color: #e65100;
+}
+
+.o_prg_rule_name {
+    max-width: 100%;
+    font-size: 0.78em;
+    line-height: 1.3;
+}
+
+.o_prg_seq_badge {
+    font-size: 0.68em;
+    color: #adb5bd;
+    margin-top: 2px;
+}
+
+/* Shared badge */
+.o_prg_shared_badge {
+    display: inline-flex;
+    align-items: center;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+    border-radius: 10px;
+    font-size: 0.68em;
+    padding: 1px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ── Detail panel ── */
+.o_prg_detail_panel {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.o_prg_detail_code {
+    display: inline-block;
+    background: #f0f0f0;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.9em;
+    color: #0d6efd;
+}
+
+.o_prg_detail_item {
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.88em;
+}
+
+.o_prg_detail_item:last-child {
+    border-bottom: none;
+}
+
+.o_prg_dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="payroll_structure_visualizer.RuleGraph">
+    <div class="o_action o_prg_root">
+
+        <!-- ── Toolbar ── -->
+        <div class="o_prg_toolbar d-flex align-items-center gap-3 px-3 py-2 border-bottom bg-white">
+            <h4 class="mb-0 me-3 fw-semibold">
+                <i class="fa fa-share-alt me-2 text-primary"/>
+                Rule Graph
+            </h4>
+            <div class="input-group input-group-sm" style="max-width:240px">
+                <span class="input-group-text"><i class="fa fa-search"/></span>
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Filter rules by name or code..."
+                    t-att-value="state.filterText"
+                    t-on-input="onSearchInput"
+                />
+            </div>
+            <div class="form-check form-switch mb-0">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="prg_shared_toggle"
+                    t-att-checked="state.showSharedOnly"
+                    t-on-change="toggleSharedOnly"
+                />
+                <label class="form-check-label small" for="prg_shared_toggle">Shared rules only</label>
+            </div>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="small text-muted d-flex align-items-center gap-2">
+                    <span class="o_prg_legend_shared"/>Shared rule (click to highlight)
+                </span>
+                <span class="small text-muted d-flex align-items-center gap-2">
+                    <span class="o_prg_legend_exclusive"/>Exclusive rule
+                </span>
+            </div>
+        </div>
+
+        <!-- ── Loading ── -->
+        <t t-if="state.loading">
+            <div class="d-flex justify-content-center align-items-center" style="height:300px">
+                <div class="spinner-border text-primary" role="status"/>
+            </div>
+        </t>
+
+        <!-- ── Body ── -->
+        <t t-else="">
+            <div class="o_prg_body" t-att-class="{'o_prg_panel_open': selectedRule}">
+
+                <!-- Column grid -->
+                <div class="o_prg_columns_area overflow-auto p-3">
+                    <div class="o_prg_columns d-flex align-items-start gap-4">
+
+                        <t t-if="!filteredStructures.length">
+                            <div class="text-center text-muted py-5 w-100">
+                                <i class="fa fa-inbox fa-2x mb-2 d-block"/>
+                                No rules match the current filter.
+                            </div>
+                        </t>
+
+                        <t t-foreach="filteredStructures" t-as="struct" t-key="struct.id">
+                            <t t-set="color" t-value="colorOf(struct.id)"/>
+                            <div class="o_prg_column flex-shrink-0">
+
+                                <!-- Structure header card -->
+                                <div class="o_prg_struct_header border rounded-2 mb-0"
+                                     t-attf-style="border-color:{{color}} !important; border-top-width:4px !important;">
+                                    <div class="o_prg_struct_header_body px-3 py-2">
+                                        <div class="fw-bold text-truncate" t-esc="struct.name"/>
+                                        <t t-if="struct.type_id">
+                                            <div class="small text-muted text-truncate" t-esc="struct.type_id[1]"/>
+                                        </t>
+                                        <div class="small text-muted mt-1">
+                                            <t t-esc="struct.rules.length"/> rules
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Connector: header to first rule -->
+                                <div class="o_prg_stem" t-attf-style="--stem-color:{{color}}"/>
+
+                                <!-- Rule cards -->
+                                <t t-foreach="struct.rules" t-as="rule" t-key="rule.id">
+                                    <div class="o_prg_rule_node"
+                                         t-att-class="{
+                                             'o_prg_rule_shared':   rule.is_shared,
+                                             'o_prg_rule_selected': isRuleHighlighted(rule),
+                                             'o_prg_rule_dimmed':   isRuleDimmed(rule),
+                                             'o_prg_rule_clickable': rule.is_shared,
+                                         }"
+                                         t-on-click="() => this.selectRule(rule)">
+
+                                        <div class="o_prg_rule_card border rounded-2 bg-white"
+                                             t-attf-style="--rule-color:{{color}}">
+                                            <div class="o_prg_rule_card_body px-3 py-2">
+                                                <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                                                    <code class="o_prg_code" t-esc="rule.code"/>
+                                                    <t t-if="rule.is_shared">
+                                                        <span class="o_prg_shared_badge">
+                                                            <i class="fa fa-link me-1"/>
+                                                            <t t-esc="rule.struct_count"/>
+                                                        </span>
+                                                    </t>
+                                                </div>
+                                                <div class="o_prg_rule_name small text-muted text-truncate"
+                                                     t-esc="rule.name"/>
+                                                <div class="o_prg_seq_badge small"
+                                                     t-esc="'seq ' + rule.sequence"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Connector to next rule (not on last) -->
+                                        <t t-if="!rule_last">
+                                            <div class="o_prg_stem" t-attf-style="--stem-color:{{color}}"/>
+                                        </t>
+
+                                    </div>
+                                </t>
+
+                            </div>
+                        </t>
+
+                    </div>
+                </div>
+
+                <!-- Detail panel -->
+                <t t-if="selectedRule">
+                    <div class="o_prg_detail_panel border-start bg-white overflow-auto">
+                        <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                            <h6 class="mb-0 fw-semibold text-primary">
+                                <i class="fa fa-link me-2"/>Shared Rule
+                            </h6>
+                            <button class="btn-close" t-on-click="clearSelection"/>
+                        </div>
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <div class="text-muted small mb-1">Name</div>
+                                <div class="fw-semibold" t-esc="selectedRule.name"/>
+                            </div>
+                            <div class="mb-3">
+                                <div class="text-muted small mb-1">Code</div>
+                                <code class="o_prg_detail_code" t-esc="selectedRule.code"/>
+                            </div>
+                            <div class="mb-3">
+                                <div class="text-muted small mb-1">Sequence</div>
+                                <span class="badge bg-secondary" t-esc="selectedRule.sequence"/>
+                            </div>
+                            <div>
+                                <div class="text-muted small mb-2">
+                                    Used in <strong t-esc="selectedRule.struct_count"/> structures:
+                                </div>
+                                <ul class="list-unstyled mb-0">
+                                    <t t-foreach="selectedRuleStructures" t-as="s" t-key="s.id">
+                                        <li class="o_prg_detail_item d-flex align-items-center gap-2 py-1">
+                                            <span class="o_prg_dot"
+                                                  t-attf-style="background:{{colorOf(s.id)}}"/>
+                                            <span t-esc="s.name"/>
+                                            <t t-if="s.type_id">
+                                                <span class="text-muted small"
+                                                      t-esc="'(' + s.type_id[1] + ')'"/>
+                                            </t>
+                                        </li>
+                                    </t>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+            </div>
+        </t>
+    </div>
+</t>
+
+</templates>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_payroll_structure_visualizer"
+        name="Structure Visualizer"
+        parent="hr_work_entry.menu_hr_payroll_configuration"
+        sequence="50"/>
+
+    <menuitem
+        id="menu_payroll_structure_visual_tree"
+        name="Visual Map"
+        parent="menu_payroll_structure_visualizer"
+        action="action_payroll_structure_visual_tree"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_payroll_rule_graph"
+        name="Rule Graph"
+        parent="menu_payroll_structure_visualizer"
+        action="action_payroll_rule_graph"
+        sequence="15"/>
+
+    <menuitem
+        id="menu_payroll_structure_visualizer_structures"
+        name="Structure Map"
+        parent="menu_payroll_structure_visualizer"
+        action="action_payroll_structure_visualizer"
+        sequence="20"/>
+
+    <menuitem
+        id="menu_payroll_structure_visualizer_rules"
+        name="Rule Sharing Map"
+        parent="menu_payroll_structure_visualizer"
+        action="action_salary_rule_shared_view"
+        sequence="30"/>
+
+</odoo>
